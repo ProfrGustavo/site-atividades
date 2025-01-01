@@ -1,19 +1,44 @@
-// Captura os elementos do DOM
-const wordInput = document.getElementById('wordInput');
-const generateButton = document.getElementById('generateButton');
-const crosswordDiv = document.getElementById('crossword');
+// Função para criar a matriz da cruzadinha
+function createMatrix(size) {
+    // Cria uma matriz vazia de `size x size`
+    const matrix = Array.from({ length: size }, () => Array(size).fill(' '));
+    return matrix;
+}
 
-// Função para gerar a cruzadinha
+// Função para exibir a matriz no navegador
+function displayMatrix(matrix) {
+    crosswordDiv.innerHTML = matrix
+        .map(row => row.map(cell => (cell === ' ' ? '&nbsp;' : cell)).join(' '))
+        .map(row => `<div>${row}</div>`)
+        .join('');
+}
+
+// Função para posicionar as palavras (por enquanto, apenas linha reta)
+function addWordsToMatrix(words, size) {
+    const matrix = createMatrix(size);
+
+    words.forEach((word, index) => {
+        if (index < size) {
+            for (let i = 0; i < word.length && i < size; i++) {
+                matrix[index][i] = word[i];
+            }
+        }
+    });
+
+    return matrix;
+}
+
+// Atualiza o evento do botão para usar a nova lógica
 generateButton.addEventListener('click', () => {
-    const words = wordInput.value.trim().split('\n'); // Separa as palavras por linha
+    const words = wordInput.value.trim().split('\n').map(w => w.toUpperCase());
     if (words.length === 0 || words[0] === "") {
         alert("Por favor, insira pelo menos uma palavra.");
         return;
     }
 
-    // Exibe a lista de palavras como placeholder (substituirá pelo algoritmo de cruzadinha)
-    crosswordDiv.innerHTML = `<p>Palavras inseridas:</p><ul>${words.map(word => `<li>${word}</li>`).join('')}</ul>`;
+    const size = 10; // Define o tamanho da matriz
+    const matrix = addWordsToMatrix(words, size);
+    displayMatrix(matrix);
 
-    // Aqui será onde a lógica para gerar a cruzadinha será implementada.
-    console.log("Palavras recebidas:", words);
+    console.log("Cruzadinha gerada:", matrix);
 });
