@@ -50,16 +50,17 @@ function canPlaceWord(matrix, word, row, col, direction) {
     return true; // Se passou por todas as verificações, pode colocar
 }
 
-// Função para verificar se a palavra tem uma letra em comum com as palavras já usadas
+// Função para verificar se uma palavra tem uma letra em comum com as palavras já usadas
 function hasCommonLetter(matrix, word) {
+    let positions = [];
     for (let row = 0; row < matrix.length; row++) {
         for (let col = 0; col < matrix[row].length; col++) {
             if (matrix[row][col] !== ' ' && word.includes(matrix[row][col])) {
-                return { row, col, letter: matrix[row][col] }; // Retorna a posição da letra comum
+                positions.push({ row, col, letter: matrix[row][col] }); // Retorna a posição da letra comum
             }
         }
     }
-    return null; // Retorna null se não houver letras em comum
+    return positions; // Retorna todas as posições onde há letras em comum
 }
 
 // Função para escolher uma palavra aleatória da lista
@@ -68,6 +69,35 @@ function chooseRandomWord(words, usedWords) {
     if (availableWords.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * availableWords.length);
     return availableWords[randomIndex];
+}
+
+// Função para verificar todas as possíveis posições de encaixe de uma palavra com as anteriores
+function findValidPositions(matrix, word, direction) {
+    const possiblePositions = [];
+    const commonLetters = hasCommonLetter(matrix, word);
+
+    // Para cada letra comum, tenta encontrar uma posição de encaixe
+    commonLetters.forEach(({ row, col, letter }) => {
+        let possiblePosition;
+
+        if (direction === 'horizontal') {
+            // Tenta encaixar a palavra verticalmente
+            let newRow = row - Math.floor(word.length / 2);
+            if (canPlaceWord(matrix, word, newRow, col, 'vertical')) {
+                possiblePosition = { word, row: newRow, col, direction: 'vertical' };
+                possiblePositions.push(possiblePosition);
+            }
+        } else if (direction === 'vertical') {
+            // Tenta encaixar a palavra horizontalmente
+            let newCol = col - Math.floor(word.length / 2);
+            if (canPlaceWord(matrix, word, row, newCol, 'horizontal')) {
+                possiblePosition = { word, row, col: newCol, direction: 'horizontal' };
+                possiblePositions.push(possiblePosition);
+            }
+        }
+    });
+
+    return possiblePositions;
 }
 
 // Função para gerar a cruzadinha
@@ -96,31 +126,15 @@ function generateCrossword(words, size) {
     let failedWords = [];
     words.forEach(word => {
         if (!usedWords.has(word)) {
-            let commonLetter = hasCommonLetter(matrix, word);
-            if (commonLetter) {
-                let placed = false;
-
-                // Determina a posição de onde a palavra será colocada
-                let { row, col, letter } = commonLetter;
-                if (direction === 'horizontal') {
-                    // Coloca a palavra verticalmente
-                    if (canPlaceWord(matrix, word, row - Math.floor(word.length / 2), col, 'vertical')) {
-                        placeWord(matrix, word, row - Math.floor(word.length / 2), col, 'vertical');
-                        usedWords.add(word);
-                        placed = true;
-                    }
-                } else if (direction === 'vertical') {
-                    // Coloca a palavra horizontalmente
-                    if (canPlaceWord(matrix, word, row, col - Math.floor(word.length / 2), 'horizontal')) {
-                        placeWord(matrix, word, row, col - Math.floor(word.length / 2), 'horizontal');
-                        usedWords.add(word);
-                        placed = true;
-                    }
-                }
-
-                if (!placed) {
-                    failedWords.push(word);
-                }
+            // Encontrar todas as posições válidas para a palavra
+            let validPositions = findValidPositions(matrix, word, direction);
+            if (validPositions.length > 0) {
+                // Escolher a primeira posição válida
+                let position = validPositions[0];
+                placeWord(matrix, word, position.row, position.col, position.direction);
+                usedWords.add(word);
+            } else {
+                failedWords.push(word);
             }
         }
     });
