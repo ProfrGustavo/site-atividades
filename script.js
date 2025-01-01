@@ -15,32 +15,6 @@ function placeFirstWord(matrix, word) {
 
 
 
-// Função para inserir a palavra de forma aleatória
-function placeWord(matrix, word, wordsPlaced) {
-    let placed = false;
-
-    // Tentamos todas as posições e direções
-    for (let i = 0; i < matrix.length && !placed; i++) {
-        for (let j = 0; j < matrix[i].length && !placed; j++) {
-            for (let direction of ['horizontal', 'vertical']) {
-                if (canPlaceWord(matrix, word, i, j, direction)) {
-                    if (direction === 'horizontal') {
-                        for (let k = 0; k < word.length; k++) {
-                            matrix[i][j + k] = word[k];
-                        }
-                    } else if (direction === 'vertical') {
-                        for (let k = 0; k < word.length; k++) {
-                            matrix[i + k][j] = word[k];
-                        }
-                    }
-                    wordsPlaced.push(word); // Marca a palavra como já colocada
-                    placed = true;
-                }
-            }
-        }
-    }
-}
-
 // Função para exibir a matriz no HTML
 function displayMatrix(matrix) {
     const crosswordDiv = document.getElementById('crossword');
