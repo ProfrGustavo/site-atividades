@@ -13,22 +13,7 @@ function placeFirstWord(matrix, word) {
     }
 }
 
-// Função para verificar se a palavra pode ser colocada
-function canPlaceWord(matrix, word, row, col, direction) {
-    if (direction === 'horizontal' && col + word.length > matrix[0].length) return false;
-    if (direction === 'vertical' && row + word.length > matrix.length) return false;
 
-    for (let i = 0; i < word.length; i++) {
-        const currentRow = direction === 'horizontal' ? row : row + i;
-        const currentCol = direction === 'horizontal' ? col + i : col;
-
-        if (matrix[currentRow][currentCol] !== ' ' && matrix[currentRow][currentCol] !== word[i]) {
-            return false; // Se já houver uma letra diferente, não pode colocar
-        }
-    }
-
-    return true;
-}
 
 // Função para inserir a palavra de forma aleatória
 function placeWord(matrix, word, wordsPlaced) {
