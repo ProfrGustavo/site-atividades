@@ -1,44 +1,48 @@
-// Função para criar a matriz da cruzadinha
+// Captura os elementos do DOM
+const wordInput = document.getElementById('wordInput'); // Campo de entrada
+const generateButton = document.getElementById('generateButton'); // Botão de gerar
+const crosswordDiv = document.getElementById('crossword'); // Área para exibir a cruzadinha
+
+// Função para criar uma matriz vazia
 function createMatrix(size) {
-    // Cria uma matriz vazia de `size x size`
-    const matrix = Array.from({ length: size }, () => Array(size).fill(' '));
-    return matrix;
+    // Cria uma matriz `size x size` preenchida com espaços vazios
+    return Array.from({ length: size }, () => Array(size).fill(' '));
 }
 
 // Função para exibir a matriz no navegador
 function displayMatrix(matrix) {
     crosswordDiv.innerHTML = matrix
-        .map(row => row.map(cell => (cell === ' ' ? '&nbsp;' : cell)).join(' '))
-        .map(row => `<div>${row}</div>`)
+        .map(row => row.map(cell => (cell === ' ' ? '&nbsp;' : cell)).join(' ')) // Substitui espaços por HTML
+        .map(row => `<div>${row}</div>`) // Envolve cada linha em uma div
         .join('');
 }
 
-// Função para posicionar as palavras (por enquanto, apenas linha reta)
+// Função para posicionar as palavras na matriz (horizontalmente por enquanto)
 function addWordsToMatrix(words, size) {
-    const matrix = createMatrix(size);
+    const matrix = createMatrix(size); // Cria a matriz inicial
 
     words.forEach((word, index) => {
-        if (index < size) {
+        if (index < size) { // Garante que não exceda o tamanho da matriz
             for (let i = 0; i < word.length && i < size; i++) {
-                matrix[index][i] = word[i];
+                matrix[index][i] = word[i]; // Posiciona as letras horizontalmente
             }
         }
     });
 
-    return matrix;
+    return matrix; // Retorna a matriz preenchida
 }
 
-// Atualiza o evento do botão para usar a nova lógica
+// Evento do botão "Gerar Cruzadinha"
 generateButton.addEventListener('click', () => {
-    const words = wordInput.value.trim().split('\n').map(w => w.toUpperCase());
+    const words = wordInput.value.trim().split('\n').map(w => w.toUpperCase()); // Captura as palavras
     if (words.length === 0 || words[0] === "") {
         alert("Por favor, insira pelo menos uma palavra.");
         return;
     }
 
-    const size = 10; // Define o tamanho da matriz
-    const matrix = addWordsToMatrix(words, size);
-    displayMatrix(matrix);
+    const size = 10; // Define o tamanho da matriz (10x10 por padrão)
+    const matrix = addWordsToMatrix(words, size); // Gera a matriz com as palavras
+    displayMatrix(matrix); // Exibe a matriz no navegador
 
-    console.log("Cruzadinha gerada:", matrix);
+    console.log("Cruzadinha gerada:", matrix); // Loga a matriz no console para debugging
 });
