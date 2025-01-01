@@ -1,29 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criador de Cruzadinhas</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Cruzadinha</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Criador de Cruzadinhas</h1>
-    </header>
-    <main>
-        <section id="inputs">
-            <h2>Insira as palavras</h2>
-            <!-- Campo para inserir as palavras -->
-            <textarea id="wordInput" placeholder="Digite uma palavra por linha"></textarea>
-            <button id="generateButton">Gerar Cruzadinha</button>
-        </section>
-        <section id="output">
-            <h2>Sua Cruzadinha</h2>
-            <!-- Div para exibir a cruzadinha -->
-            <div id="crossword"></div>
-        </section>
-    </main>
-    <!-- Conexão com o JavaScript -->
+    <h1>Cruzadinha</h1>
+    
+    <div>
+        <label for="words-input">Digite suas palavras (separe por vírgula):</label><br>
+        <input type="text" id="words-input" placeholder="Exemplo: COMPUTADOR, TECNOLOGIA, PROGRAMAÇÃO">
+    </div>
+    <button onclick="generateAndDisplayCrossword()">Gerar Cruzadinha</button>
+
+    <div id="crossword"></div>
+
     <script src="script.js"></script>
 </body>
 </html>
