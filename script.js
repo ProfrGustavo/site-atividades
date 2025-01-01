@@ -3,9 +3,8 @@ const wordInput = document.getElementById('wordInput'); // Campo de entrada
 const generateButton = document.getElementById('generateButton'); // Botão de gerar
 const crosswordDiv = document.getElementById('crossword'); // Área para exibir a cruzadinha
 
-// Função para criar uma matriz vazia
+// Função para criar a matriz 64x64
 function createMatrix(size) {
-    // Cria uma matriz `size x size` preenchida com espaços vazios
     return Array.from({ length: size }, () => Array(size).fill(' '));
 }
 
@@ -17,44 +16,97 @@ function displayMatrix(matrix) {
         .join('');
 }
 
-// Função para verificar se a palavra pode ser colocada na posição (linha, coluna) na direção horizontal
-function canPlaceHorizontal(matrix, word, row, col) {
-    if (col + word.length > matrix[row].length) return false; // Verifica se cabe na linha
-
+// Função para colocar uma palavra na matriz, horizontal ou vertical
+function placeWord(matrix, word, row, col, direction) {
     for (let i = 0; i < word.length; i++) {
-        if (matrix[row][col + i] !== ' ' && matrix[row][col + i] !== word[i]) {
-            return false; // Se houver uma letra diferente na posição, não pode colocar a palavra
+        if (direction === 'horizontal') {
+            matrix[row][col + i] = word[i];
+        } else if (direction === 'vertical') {
+            matrix[row + i][col] = word[i];
         }
     }
-    return true;
 }
 
-// Função para verificar se a palavra pode ser colocada na posição (linha, coluna) na direção vertical
-function canPlaceVertical(matrix, word, row, col) {
-    if (row + word.length > matrix.length) return false; // Verifica se cabe na coluna
+// Função para verificar se uma palavra pode ser colocada na matriz (horizontal ou vertical)
+function canPlaceWord(matrix, word, row, col, direction) {
+    if (direction === 'horizontal') {
+        if (col + word.length > matrix[row].length) return false; // Verifica se cabe na linha
 
-    for (let i = 0; i < word.length; i++) {
-        if (matrix[row + i][col] !== ' ' && matrix[row + i][col] !== word[i]) {
-            return false; // Se houver uma letra diferente na posição, não pode colocar a palavra
+        for (let i = 0; i < word.length; i++) {
+            if (matrix[row][col + i] !== ' ' && matrix[row][col + i] !== word[i]) {
+                return false; // Se já houver uma letra diferente, não pode colocar
+            }
+        }
+    } else if (direction === 'vertical') {
+        if (row + word.length > matrix.length) return false; // Verifica se cabe na coluna
+
+        for (let i = 0; i < word.length; i++) {
+            if (matrix[row + i][col] !== ' ' && matrix[row + i][col] !== word[i]) {
+                return false; // Se já houver uma letra diferente, não pode colocar
+            }
         }
     }
-    return true;
+
+    return true; // Se passou por todas as verificações, pode colocar
 }
 
-// Função para adicionar a palavra na matriz na direção horizontal
-function placeHorizontal(matrix, word, row, col) {
-    for (let i = 0; i < word.length; i++) {
-        matrix[row][col + i] = word[i]; // Coloca a palavra na linha
+// Função para escolher uma palavra aleatória da lista
+function chooseRandomWord(words) {
+    const randomIndex = Math.floor(Math.random() * words.length);
+    return words[randomIndex];
+}
+
+// Função principal para gerar a cruzadinha
+function generateCrossword(words, size) {
+    const matrix = createMatrix(size); // Cria a matriz 64x64
+
+    // Remove palavras já usadas
+    let usedWords = new Set();
+
+    // Escolher a primeira palavra aleatória e colocá-la no centro
+    let firstWord = chooseRandomWord(words);
+    let wordStartRow = Math.floor(size / 2);
+    let wordStartCol = Math.floor(size / 2) - Math.floor(firstWord.length / 2);
+
+    placeWord(matrix, firstWord, wordStartRow, wordStartCol, 'horizontal');
+    usedWords.add(firstWord);
+
+    // Tentar colocar as palavras seguintes
+    words.forEach(word => {
+        if (!usedWords.has(word)) {
+            let placed = false;
+
+            // Tentando colocar a palavra horizontalmente ou verticalmente
+            for (let row = 0; row < size && !placed; row++) {
+                for (let col = 0; col < size && !placed; col++) {
+                    if (canPlaceWord(matrix, word, row, col, 'horizontal')) {
+                        placeWord(matrix, word, row, col, 'horizontal');
+                        usedWords.add(word);
+                        placed = true;
+                    } else if (canPlaceWord(matrix, word, row, col, 'vertical')) {
+                        placeWord(matrix, word, row, col, 'vertical');
+                        usedWords.add(word);
+                        placed = true;
+                    }
+                }
+            }
+        }
+    });
+
+    return matrix; // Retorna a matriz com as palavras
+}
+
+// Evento do botão "Gerar Cruzadinha"
+generateButton.addEventListener('click', () => {
+    const words = wordInput.value.trim().split('\n').map(w => w.toUpperCase()); // Captura as palavras
+    if (words.length === 0 || words[0] === "") {
+        alert("Por favor, insira pelo menos uma palavra.");
+        return;
     }
-}
 
-// Função para adicionar a palavra na matriz na direção vertical
-function placeVertical(matrix, word, row, col) {
-    for (let i = 0; i < word.length; i++) {
-        matrix[row + i][col] = word[i]; // Coloca a palavra na coluna
-    }
-}
+    const size = 64; // Define o tamanho da matriz (64x64 por padrão)
+    const matrix = generateCrossword(words, size); // Gera a matriz com as palavras
+    displayMatrix(matrix); // Exibe a matriz no navegador
 
-// Função para posicionar as palavras na matriz (horizontal e vertical)
-function addWordsToMatrix(words, size) {
-    const matrix = creat
+    console.log("Cruzadinha gerada:", matrix); // Loga a matriz no console para debugging
+});
