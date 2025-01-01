@@ -17,15 +17,25 @@ function displayMatrix(matrix) {
         .join('');
 }
 
-// Função para posicionar as palavras na matriz (horizontalmente por enquanto)
+// Função para posicionar as palavras na matriz (horizontal e vertical)
 function addWordsToMatrix(words, size) {
     const matrix = createMatrix(size); // Cria a matriz inicial
 
+    let row = 0; // Começamos na primeira linha
+    let col = 0; // Começamos na primeira coluna
+
     words.forEach((word, index) => {
-        if (index < size) { // Garante que não exceda o tamanho da matriz
-            for (let i = 0; i < word.length && i < size; i++) {
-                matrix[index][i] = word[i]; // Posiciona as letras horizontalmente
+        // Tentamos colocar a palavra na horizontal
+        if (col + word.length <= size) { // Verifica se a palavra cabe horizontalmente
+            for (let i = 0; i < word.length; i++) {
+                matrix[row][col + i] = word[i]; // Coloca a palavra na linha
             }
+            col += word.length + 1; // Ajusta a posição para a próxima palavra
+        } else if (row + word.length <= size) { // Caso não caiba horizontalmente, tentamos verticalmente
+            for (let i = 0; i < word.length; i++) {
+                matrix[row + i][col] = word[i]; // Coloca a palavra na coluna
+            }
+            row += word.length + 1; // Ajusta a posição para a próxima palavra
         }
     });
 
