@@ -55,11 +55,11 @@ function hasCommonLetter(matrix, word) {
     for (let row = 0; row < matrix.length; row++) {
         for (let col = 0; col < matrix[row].length; col++) {
             if (matrix[row][col] !== ' ' && word.includes(matrix[row][col])) {
-                return true;
+                return { row, col, letter: matrix[row][col] }; // Retorna a posição da letra comum
             }
         }
     }
-    return false;
+    return null; // Retorna null se não houver letras em comum
 }
 
 // Função para escolher uma palavra aleatória da lista
@@ -70,11 +70,11 @@ function chooseRandomWord(words, usedWords) {
     return availableWords[randomIndex];
 }
 
-// Função principal para gerar a cruzadinha
+// Função para gerar a cruzadinha
 function generateCrossword(words, size) {
     const matrix = createMatrix(size); // Cria a matriz 30x30
     let usedWords = new Set(); // Conjunto de palavras já usadas
-    let direction = 'horizontal'; // Define a direção da primeira palavra
+    let direction = 'horizontal'; // A primeira palavra será horizontal
 
     // Escolher a primeira palavra e colocá-la no centro
     let firstWord = chooseRandomWord(words, usedWords);
@@ -95,27 +95,33 @@ function generateCrossword(words, size) {
     // Tentar colocar as palavras seguintes
     let failedWords = [];
     words.forEach(word => {
-        if (!usedWords.has(word) && hasCommonLetter(matrix, word)) {
-            let placed = false;
+        if (!usedWords.has(word)) {
+            let commonLetter = hasCommonLetter(matrix, word);
+            if (commonLetter) {
+                let placed = false;
 
-            // Tentando colocar a palavra horizontalmente ou verticalmente
-            for (let row = 0; row < size && !placed; row++) {
-                for (let col = 0; col < size && !placed; col++) {
-                    if (canPlaceWord(matrix, word, row, col, direction)) {
-                        placeWord(matrix, word, row, col, direction);
+                // Determina a posição de onde a palavra será colocada
+                let { row, col, letter } = commonLetter;
+                if (direction === 'horizontal') {
+                    // Coloca a palavra verticalmente
+                    if (canPlaceWord(matrix, word, row - Math.floor(word.length / 2), col, 'vertical')) {
+                        placeWord(matrix, word, row - Math.floor(word.length / 2), col, 'vertical');
+                        usedWords.add(word);
+                        placed = true;
+                    }
+                } else if (direction === 'vertical') {
+                    // Coloca a palavra horizontalmente
+                    if (canPlaceWord(matrix, word, row, col - Math.floor(word.length / 2), 'horizontal')) {
+                        placeWord(matrix, word, row, col - Math.floor(word.length / 2), 'horizontal');
                         usedWords.add(word);
                         placed = true;
                     }
                 }
-            }
 
-            // Se não conseguiu colocar a palavra, registra
-            if (!placed) {
-                failedWords.push(word);
+                if (!placed) {
+                    failedWords.push(word);
+                }
             }
-
-            // Alterna a direção para a próxima palavra
-            direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
         }
     });
 
