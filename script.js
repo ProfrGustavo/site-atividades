@@ -93,6 +93,7 @@ function generateCrossword(words, size) {
     direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
 
     // Tentar colocar as palavras seguintes
+    let failedWords = [];
     words.forEach(word => {
         if (!usedWords.has(word) && hasCommonLetter(matrix, word)) {
             let placed = false;
@@ -108,10 +109,20 @@ function generateCrossword(words, size) {
                 }
             }
 
+            // Se não conseguiu colocar a palavra, registra
+            if (!placed) {
+                failedWords.push(word);
+            }
+
             // Alterna a direção para a próxima palavra
             direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
         }
     });
+
+    // Se houver palavras não colocadas, exibe o erro
+    if (failedWords.length > 0) {
+        alert(`As palavras não puderam ser colocadas: ${failedWords.join(', ')}`);
+    }
 
     return matrix; // Retorna a matriz com as palavras
 }
