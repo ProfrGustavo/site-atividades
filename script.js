@@ -3,7 +3,7 @@ const wordInput = document.getElementById('wordInput'); // Campo de entrada
 const generateButton = document.getElementById('generateButton'); // Botão de gerar
 const crosswordDiv = document.getElementById('crossword'); // Área para exibir a cruzadinha
 
-// Função para criar a matriz 64x64
+// Função para criar a matriz 30x30
 function createMatrix(size) {
     return Array.from({ length: size }, () => Array(size).fill(' '));
 }
@@ -50,46 +50,66 @@ function canPlaceWord(matrix, word, row, col, direction) {
     return true; // Se passou por todas as verificações, pode colocar
 }
 
+// Função para verificar se a palavra tem uma letra em comum com as palavras já usadas
+function hasCommonLetter(matrix, word) {
+    for (let row = 0; row < matrix.length; row++) {
+        for (let col = 0; col < matrix[row].length; col++) {
+            if (matrix[row][col] !== ' ' && word.includes(matrix[row][col])) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // Função para escolher uma palavra aleatória da lista
-function chooseRandomWord(words) {
-    const randomIndex = Math.floor(Math.random() * words.length);
-    return words[randomIndex];
+function chooseRandomWord(words, usedWords) {
+    let availableWords = words.filter(word => !usedWords.has(word));
+    if (availableWords.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * availableWords.length);
+    return availableWords[randomIndex];
 }
 
 // Função principal para gerar a cruzadinha
 function generateCrossword(words, size) {
-    const matrix = createMatrix(size); // Cria a matriz 64x64
+    const matrix = createMatrix(size); // Cria a matriz 30x30
+    let usedWords = new Set(); // Conjunto de palavras já usadas
+    let direction = 'horizontal'; // Define a direção da primeira palavra
 
-    // Remove palavras já usadas
-    let usedWords = new Set();
+    // Escolher a primeira palavra e colocá-la no centro
+    let firstWord = chooseRandomWord(words, usedWords);
+    if (!firstWord) {
+        alert("Não há palavras suficientes para gerar a cruzadinha.");
+        return matrix;
+    }
 
-    // Escolher a primeira palavra aleatória e colocá-la no centro
-    let firstWord = chooseRandomWord(words);
     let wordStartRow = Math.floor(size / 2);
     let wordStartCol = Math.floor(size / 2) - Math.floor(firstWord.length / 2);
 
-    placeWord(matrix, firstWord, wordStartRow, wordStartCol, 'horizontal');
+    placeWord(matrix, firstWord, wordStartRow, wordStartCol, direction);
     usedWords.add(firstWord);
+
+    // Alterna a direção para a próxima palavra
+    direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
 
     // Tentar colocar as palavras seguintes
     words.forEach(word => {
-        if (!usedWords.has(word)) {
+        if (!usedWords.has(word) && hasCommonLetter(matrix, word)) {
             let placed = false;
 
             // Tentando colocar a palavra horizontalmente ou verticalmente
             for (let row = 0; row < size && !placed; row++) {
                 for (let col = 0; col < size && !placed; col++) {
-                    if (canPlaceWord(matrix, word, row, col, 'horizontal')) {
-                        placeWord(matrix, word, row, col, 'horizontal');
-                        usedWords.add(word);
-                        placed = true;
-                    } else if (canPlaceWord(matrix, word, row, col, 'vertical')) {
-                        placeWord(matrix, word, row, col, 'vertical');
+                    if (canPlaceWord(matrix, word, row, col, direction)) {
+                        placeWord(matrix, word, row, col, direction);
                         usedWords.add(word);
                         placed = true;
                     }
                 }
             }
+
+            // Alterna a direção para a próxima palavra
+            direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
         }
     });
 
@@ -104,7 +124,7 @@ generateButton.addEventListener('click', () => {
         return;
     }
 
-    const size = 64; // Define o tamanho da matriz (64x64 por padrão)
+    const size = 30; // Define o tamanho da matriz (30x30)
     const matrix = generateCrossword(words, size); // Gera a matriz com as palavras
     displayMatrix(matrix); // Exibe a matriz no navegador
 
